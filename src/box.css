@@ -1,0 +1,11 @@
+table {
+    font-family: sans-serif;
+}
+
+td {
+    border: 1px solid black;
+    width: 4rem;
+    height: 4rem;
+    text-align: center;
+    font-size: 2rem;
+}
