@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./box.css";
+import "./main.css";
 
 const App = () => {
   const CROSS = "X";
@@ -9,9 +10,20 @@ const App = () => {
 
   const [board, setBoard] = useState(emptyBoard);
   const [turn, setTurn] = useState(CROSS);
+  const [winner, setWinner] = useState(null);
 
   useEffect(() => {
-    checkWinner(board);
+    var result = checkWinner();
+
+    if (result != null) {
+      // There is a winner
+      setWinner(result);
+    } else {
+      // If all the cells are filled and there is no winner, it's a tie
+      if (isBoardFull()) {
+        setWinner("Tie");
+      }
+    }
   }, [board]);
 
   const checkWinner = () => {
@@ -25,7 +37,7 @@ const App = () => {
       }
       // Check if all elements in row are the same
       if (row.every((element) => element === row[0])) {
-        alert(row[0] + " wins!");
+        return row[0];
       }
     }
 
@@ -43,7 +55,7 @@ const App = () => {
         }
       }
       if (foundWinner) {
-        alert(player + " wins!");
+        return player;
       }
       break;
     }
@@ -59,7 +71,7 @@ const App = () => {
         }
       }
       if (foundWinner) {
-        alert(player + " wins!");
+        return player;
       }
     }
 
@@ -73,14 +85,17 @@ const App = () => {
         }
       }
       if (foundWinner) {
-        alert(player + " wins!");
+        return player;
       }
     }
+
+    return null;
   };
 
   const playerClicked = (row, col) => {
     // If the square is already filled, do nothing
     if (board[row][col]) return;
+    if (winner != null) return;
 
     // Change board state
     const newBoard = board.map((r, ri) =>
@@ -97,26 +112,58 @@ const App = () => {
     setTurn(turn === CROSS ? CIRCLE : CROSS);
   };
 
+  const resetBoard = () => {
+    setBoard(emptyBoard);
+    setTurn(CROSS);
+    setWinner(null);
+  };
+
+  const isBoardFull = () => {
+    for (let i = 0; i < dimensions; i++) {
+      for (let j = 0; j < dimensions; j++) {
+        if (!board[i][j]) {
+          return false;
+        }
+      }
+    }
+    return true;
+  };
+
   return (
-    <table>
-      <tbody>
-        {board.map((row, rowIndex) => {
-          // For each row, create a row of cells of size dimensions
-          return (
-            <tr key={rowIndex}>
-              {row.map((cell, cellIndex) => (
-                <td
-                  key={cellIndex}
-                  onClick={() => playerClicked(rowIndex, cellIndex)}
-                >
-                  {board[rowIndex][cellIndex]}
-                </td>
-              ))}
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
+    <div className="container">
+      {winner === null && <p>Player {turn}'s turn</p>}
+      <table>
+        <tbody>
+          {board.map((row, rowIndex) => {
+            // For each row, create a row of cells of size dimensions
+            return (
+              <tr key={rowIndex}>
+                {row.map((cell, cellIndex) => (
+                  <td
+                    key={cellIndex}
+                    onClick={() => playerClicked(rowIndex, cellIndex)}
+                  >
+                    {board[rowIndex][cellIndex]}
+                  </td>
+                ))}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      {winner != null && (
+        <div>
+          {winner != "Tie" ? (
+            <p className="winner">Winner: {winner}</p>
+          ) : (
+            <p>The Game is tied!</p>
+          )}
+          <p className="link" onClick={resetBoard}>
+            Play Again
+          </p>
+        </div>
+      )}
+    </div>
   );
 };
 
